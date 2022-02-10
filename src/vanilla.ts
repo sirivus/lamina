@@ -32,34 +32,40 @@ class LayerMaterial extends ShaderMaterial {
       variables.vert += layer.getVertexVariables() + ' \n'
       Object.keys(layer.uniforms).forEach((key) => (uniforms[key] = layer.uniforms[key]))
       body.frag += layer.getFragmentBody('sc_finalColor') + ' \n'
-      body.vert += layer.getVertexBody('') + ' \n'
+      body.vert += layer.getVertexBody('lamina_finalPosition') + ' \n'
     })
 
     return {
       uniforms,
-      vertexShader: `
-
-    ${variables.vert}
-    void main() {
-      ${body.vert}
-      vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
-      gl_Position = projectionMatrix * modelViewPosition;
-    }
-    `,
-      fragmentShader: `
+      vertexShader: /* glsl */ `
       ${HelperChunk}
       ${NoiseChunk}
-    ${BlendModesChunk}
-    ${variables.frag}
-    void main() {
-      vec4 sc_finalColor = vec4(vec3(1.), 1.);
-      ${body.frag}
-      gl_FragColor = sc_finalColor;
-      #include <tonemapping_fragment>
-      #include <encodings_fragment>
-      #include <fog_fragment>
-      #include <premultiplied_alpha_fragment>
-      #include <dithering_fragment>
+      ${BlendModesChunk}
+      ${variables.vert}
+      void main() {
+        vec3 lamina_finalPosition = position;
+        ${body.vert}
+
+        vec4 modelViewPosition = modelViewMatrix * vec4(lamina_finalPosition, 1.0);
+        gl_Position = projectionMatrix * modelViewPosition;
+
+      }
+    `,
+      fragmentShader: /* glsl */ `
+      ${HelperChunk}
+      ${NoiseChunk}
+      ${BlendModesChunk}
+      ${variables.frag}
+      void main() {
+        vec4 sc_finalColor = vec4(vec3(1.), 1.);
+        ${body.frag}
+        gl_FragColor = sc_finalColor;
+
+        #include <tonemapping_fragment>
+        #include <encodings_fragment>
+        #include <fog_fragment>
+        #include <premultiplied_alpha_fragment>
+        #include <dithering_fragment>
     }
     `,
     }

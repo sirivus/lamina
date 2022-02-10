@@ -85,6 +85,9 @@ export interface NoiseProps {
   scale?: number
   type?: NoiseType
   mapping?: MappingType
+  vertex?: boolean
+  offset?: Vector3
+  strength?: number
 }
 
 export interface NormalsProps {
